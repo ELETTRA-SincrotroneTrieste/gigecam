@@ -1,0 +1,245 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2//EN">
+<HTML>
+<HEAD>
+<Title> Tango Device Server User's Guide </Title>
+</HEAD>
+<BODY TEXT="#000000" BGCOLOR="#FFFFFF" LINK="#0000FF" VLINK="#7F00FF" ALINK="#FF0000">
+
+<P><!-------TITLE------></P>
+
+<TABLE BORDER="0" WIDTH="100%">
+    <TR>
+        <TD ALIGN="left">
+			<A HREF="http://www.esrf.fr/" TARGET=new>
+			<IMG SRC="http://www.esrf.fr/gifs/logo/80.gif" BORDER=0 Height="60"></A>
+		</Td>
+        <TD ALIGN="center">
+			<A HREF="http://www.elettra.trieste.it/" TARGET=new>
+			<IMG SRC="http://www.esrf.fr/computing/cs/tango/elettra_logo.gif" BORDER=0 Height="60"></A>
+
+		</Td>
+        <TD ALIGN="center">
+			<A HREF="http://www.synchrotron-soleil.fr/" TARGET=new>
+			<IMG SRC="http://www.esrf.fr/computing/cs/tango/soleil_logo.gif" BORDER=0 Height="60"></A>
+		</Td>
+        <TD ALIGN="right">
+			<A HREF="http://www.cells.es/" TARGET=new>
+			<IMG SRC="http://www.esrf.fr/computing/cs/tango/alba.jpg" BORDER=0 Height="54"></A>
+		</Td>
+        <TD ALIGN="right">
+			<A HREF="http://www.desy.de/html/home/index_eng.html" TARGET=new>
+			<IMG SRC="http://www.esrf.fr/computing/cs/tango/desy.gif" BORDER=0 Height="60"></A>
+		</Td>
+    	 <Td>
+			<H2><FONT COLOR="#7F00FF">
+			<Center><A HREF="http://www.tango-controls.org/" TARGET="_top">
+					 TANGO </a> <Br> Device Server
+			</Center></FONT>
+		</Td>
+    </TR>
+</TABLE>
+
+<HR WIDTH="100%"></H5>
+<Br>
+<center>
+<h1>
+Gigabit Camera Server		<Br>
+Properties Description 		<Br> <Br>
+GigeCam Class	<Br>
+</h1>
+<b>
+Revision:  - Author: giulio
+</b>
+</center>
+
+
+<Br> <Br> <Br> 
+<Center>
+<Br> <Br> <Br> 
+<Table Border=2 Cellpadding=3 CELLSPACING=0 WIDTH="100%">
+<TR BGCOLOR="#CCCCFF" CLASS="TableHeadingColor">
+<Td COLSPAN=3> <Font Size=+2><Center><b>Device Properties</b></td></Font></Center>
+<TR BGCOLOR="#CCCCFF" CLASS="TableHeadingColor">
+<Td><Center><b>Property name</b></td></Center>
+<Td><Center><b>Property type</b></td></Center>
+<Td><Center><b>Description</b></td></Center>
+<Tr><Td><b><a href=#Dev_DefaultValues>Configuration </a></b></Td>
+<Td><Font Size=-1>Array of string</Font></Td>
+<Td><Font Size=-1>Table of configurations for the cameras that could be connected by this device.
+Format is:
+label:ip address:offset_pos:gain_pos:img depth:exposure:gain:binning:updown:mirror:trigger mode:pixelXmm hor:pixelXmm ver: hor mech offset: ver mech offset
+
+For example:
+pil_camera_p1.1:192.168.1.10:10:0.01:8:10:350:1:0:0:1:15:10:0:0</Font></Td></Tr>
+
+<Tr><Td><b><a href=#Dev_DefaultValues>AutoRoi </a></b></Td>
+<Td><Font Size=-1>Tango::DEV_BOOLEAN</Font></Td>
+<Td><Font Size=-1>Enable autoroi (to minimize the area used for image processing</Font></Td></Tr>
+
+<Tr><Td><b><a href=#Dev_DefaultValues>AutoRoiParam </a></b></Td>
+<Td><Font Size=-1>Array of double</Font></Td>
+<Td><Font Size=-1>Parameters for autoroi configuration algorithm.
+param[0]=image decimation size (10 -> max image size)
+param[1]=low pass filter (1-10)
+param[2]=intensity threshold (0-10)</Font></Td></Tr>
+
+<Tr><Td><b><a href=#Dev_DefaultValues>ImageProcessing </a></b></Td>
+<Td><Font Size=-1>Tango::DEV_BOOLEAN</Font></Td>
+<Td><Font Size=-1>Enable image processing</Font></Td></Tr>
+
+<Tr><Td><b><a href=#Dev_DefaultValues>PlotMode </a></b></Td>
+<Td><Font Size=-1>Array of short</Font></Td>
+<Td><Font Size=-1>Set plot mode:
+short[0]=  0x1=plot axis & roi 0x2=plot spot contour 0x3=plot axis and spot contour
+short[1]= plot color</Font></Td></Tr>
+
+<Tr><Td><b><a href=#Dev_DefaultValues>FastCalculation </a></b></Td>
+<Td><Font Size=-1>Tango::DEV_BOOLEAN</Font></Td>
+<Td><Font Size=-1>Enable fast calculation algorithm.
+</Font></Td></Tr>
+
+<Tr><Td><b><a href=#Dev_DefaultValues>ImageBufferSize </a></b></Td>
+<Td><Font Size=-1>Tango::DEV_SHORT</Font></Td>
+<Td><Font Size=-1>Number of images stored in the circular buffer</Font></Td></Tr>
+
+<Tr><Td><b><a href=#Dev_DefaultValues>DataBufferSize </a></b></Td>
+<Td><Font Size=-1>Tango::DEV_LONG</Font></Td>
+<Td><Font Size=-1>Number of samples stored in the circular buffer for main parameters (horpos,verpos</Font></Td></Tr>
+
+<Tr><Td><b><a href=#Dev_DefaultValues>SearchBackgroundParam </a></b></Td>
+<Td><Font Size=-1>Array of double</Font></Td>
+<Td><Font Size=-1>Search background parameters:
+double[0]=number of background levels
+double[1]=derivative factor</Font></Td></Tr>
+
+<Tr><Td><b><a href=#Dev_DefaultValues>RnmEnabled </a></b></Td>
+<Td><Font Size=-1>Tango::DEV_BOOLEAN</Font></Td>
+<Td><Font Size=-1>Enable rnm data support</Font></Td></Tr>
+
+<Tr><Td><b><a href=#Dev_DefaultValues>AutoConnect </a></b></Td>
+<Td><Font Size=-1>Tango::DEV_BOOLEAN</Font></Td>
+<Td><Font Size=-1>If true connect to a camera when the device starts. (There must be only one camera supported).</Font></Td></Tr>
+
+<Tr><Td><b><a href=#Dev_DefaultValues>RnmIndex </a></b></Td>
+<Td><Font Size=-1>Tango::DEV_LONG</Font></Td>
+<Td><Font Size=-1>Rnm index of camera</Font></Td></Tr>
+
+<Tr><Td><b><a href=#Dev_DefaultValues>ProcessMode </a></b></Td>
+<Td><Font Size=-1>Tango::DEV_LONG</Font></Td>
+<Td><Font Size=-1>0=raw
+1=gaussian fit
+2=gaussian asymmetric
+4=confiteor</Font></Td></Tr>
+
+</Table>
+
+</Center>
+<Br><Br><Br>
+<Br><Br><Br>
+
+<A name=Dev_DefaultValues><!---  ---></a>
+<Font Size=+1>Device Properties Default Values:</Font><Br>
+<Table Border=2 Cellpadding=2 CELLSPACING=2>
+    <tr BGCOLOR="#CCCCFF" CLASS="TableHeadingColor">
+        <Td><b>Property Name</b></td>
+        <td><b>Default Values</b></td>
+    </Tr>
+    <Tr>
+        <Td>Configuration</Td>
+        <td>No default value</td>
+    </Tr>
+    <Tr>
+        <Td>AutoRoi</Td>
+        <td>true</td>
+    </Tr>
+    <Tr>
+        <Td>AutoRoiParam</Td>
+        <td>50, 5, 1</td>
+    </Tr>
+    <Tr>
+        <Td>ImageProcessing</Td>
+        <td>true</td>
+    </Tr>
+    <Tr>
+        <Td>PlotMode</Td>
+        <td>3, 0</td>
+    </Tr>
+    <Tr>
+        <Td>FastCalculation</Td>
+        <td>No default value</td>
+    </Tr>
+    <Tr>
+        <Td>ImageBufferSize</Td>
+        <td>100</td>
+    </Tr>
+    <Tr>
+        <Td>DataBufferSize</Td>
+        <td>No default value</td>
+    </Tr>
+    <Tr>
+        <Td>SearchBackgroundParam</Td>
+        <td>20, 0.4</td>
+    </Tr>
+    <Tr>
+        <Td>RnmEnabled</Td>
+        <td>false</td>
+    </Tr>
+    <Tr>
+        <Td>AutoConnect</Td>
+        <td>false</td>
+    </Tr>
+    <Tr>
+        <Td>RnmIndex</Td>
+        <td>-1</td>
+    </Tr>
+    <Tr>
+        <Td>ProcessMode</Td>
+        <td>0</td>
+    </Tr>
+</Table>
+
+<Br><Br><Br>
+<Center><b>
+There is no Class properties.<Br><Br>
+</Center></b>
+<Br> <Br> <Br> 
+
+<!--- html Footer --->
+
+<Center>
+<Font size=-1>
+<br>
+<br>
+<TABLE BORDER="1" WIDTH="100%">
+    <Tr>
+		<!--- Hosted by Sourceforge --->
+        <Td Align="Center">
+			<b>TANGO</b> is an open source project hosted by :<br>
+			<A href="http://sourceforge.net" Target="new">
+					<IMG title="Sourceforge logo"
+						alt="Sourceforge logo small"
+						src="http://www.esrf.fr/computing/cs/tango/sourceforge.gif"
+						border=0> </a>
+		</Td>
+		<!--- 2 Sourceforge Repositories --->
+		<Td Align="Center">
+			Core and Tools :
+			<a href="http://tango-cs.cvs.sourceforge.net/tango-cs/" Target="new">
+			CVS repository</a> on
+			<a href="https://sourceforge.net/projects/tango-cs" Target=new>
+			tango-cs project</a>
+
+			<br>
+
+			Device Servers :
+			<a href="http://tango-ds.cvs.sourceforge.net/tango-ds/" Target="new">
+					CVS repository</a> on
+			<a href="https://sourceforge.net/projects/tango-ds" Target=new>
+					tango-ds project</a>
+		</Td>
+    </Tr>
+</Table>
+</Font>
+</Center>
+</body>
+</html>

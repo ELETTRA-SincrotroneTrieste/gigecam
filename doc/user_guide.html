@@ -1,0 +1,1019 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2//EN">
+<HTML>
+<HEAD>
+<Title> Tango Device Server User's Guide </Title>
+</HEAD>
+<BODY TEXT="#000000" BGCOLOR="#FFFFFF" LINK="#0000FF" VLINK="#7F00FF" ALINK="#FF0000">
+
+<P><!-------TITLE------></P>
+<TABLE BORDER="0" WIDTH="100%">
+    <TR>
+        <TD ALIGN="left">
+			<A HREF="http://www.esrf.fr/" TARGET=new>
+			<IMG SRC="http://www.esrf.fr/gifs/logo/80.gif" BORDER=0 Height="60"></A>
+		</Td>
+        <TD ALIGN="center">
+			<A HREF="http://www.elettra.trieste.it/" TARGET=new>
+			<IMG SRC="http://www.esrf.fr/computing/cs/tango/elettra_logo.gif" BORDER=0 Height="60"></A>
+
+		</Td>
+        <TD ALIGN="center">
+			<A HREF="http://www.synchrotron-soleil.fr/" TARGET=new>
+			<IMG SRC="http://www.esrf.fr/computing/cs/tango/soleil_logo.gif" BORDER=0 Height="60"></A>
+		</Td>
+        <TD ALIGN="right">
+			<A HREF="http://www.cells.es/" TARGET=new>
+			<IMG SRC="http://www.esrf.fr/computing/cs/tango/alba.jpg" BORDER=0 Height="54"></A>
+		</Td>
+        <TD ALIGN="right">
+			<A HREF="http://www.desy.de/html/home/index_eng.html" TARGET=new>
+			<IMG SRC="http://www.esrf.fr/computing/cs/tango/desy.gif" BORDER=0 Height="60"></A>
+		</Td>
+    	 <Td>
+			<H2><FONT COLOR="#7F00FF">
+			<Center><A HREF="http://www.tango-controls.org/" TARGET="_top">
+					 TANGO </a> <Br> Device Server
+			</Center></FONT>
+		</Td>
+    </TR>
+</TABLE>
+
+<HR WIDTH="100%"></H5>
+
+<Br>&nbsp;<Br><Br>&nbsp;<Br><Br>&nbsp;<Br><center><Table Border=2 Cellpadding=3 CELLSPACING=0 WIDTH="100%">
+<Tr><Td><Br>&nbsp;<Br>
+<center>
+<h1>
+Gigabit Camera Server <Br>
+User's Guide<Br>&nbsp;<Br> <Br><Br>
+GigeCam Class<Br>&nbsp;<Br></Td></Tr>
+</h1>
+<Tr><Td>
+<b><Center>Revision:  - Author: giulio <Br>
+ Implemented in C++ -  CVS repository: ESRF
+</Center></b>
+</Td></Tr>
+</center>
+</Table>
+</center>
+<Br>
+<Br>
+<Br>
+<Br>
+<Br>&nbsp;<Br><Br>&nbsp;<Br>
+<h2>Introduction:</h2>
+<ul>
+	This server connects to a camera using an external thread. Inside this thread, images are acquired and stored
+in an array of objects that also do the image processing.
+Currently this server support Basler Gigabit cameras.
+To make the server work correctly, it is necessary to setup the ethernet interface with
+an mtu > 8000 and disable autonegotiation.<Br>
+</ul>
+<Br>
+<Br>
+<Br>&nbsp;<Br><Br>
+<h2>Class Inheritance:</h2>
+	<ul>
+		<li> <a href="http://www.esrf.fr/computing/cs/tango/tango_doc/kernel_doc/cpp_doc/classTango_1_1Device__3Impl.html"> Tango::Device_3Impl</a></li>
+		<ul>
+			<li> GigeCam</li>
+			</ul>
+		</ul>
+	</ul>
+</ul>
+<Br>&nbsp;<Br>
+
+<Br>&nbsp;<Br><Br>&nbsp;<Br><h2>Properties:</h2>
+
+
+<Br> <Br> <Br> 
+<Center>
+<Br> <Br> <Br> 
+<Table Border=2 Cellpadding=3 CELLSPACING=0 WIDTH="100%">
+<TR BGCOLOR="#CCCCFF" CLASS="TableHeadingColor">
+<Td COLSPAN=3> <Font Size=+2><Center><b>Device Properties</b></td></Font></Center>
+<TR BGCOLOR="#CCCCFF" CLASS="TableHeadingColor">
+<Td><Center><b>Property name</b></td></Center>
+<Td><Center><b>Property type</b></td></Center>
+<Td><Center><b>Description</b></td></Center>
+<Tr><Td><b><a href=#Dev_DefaultValues>Configuration </a></b></Td>
+<Td><Font Size=-1>Array of string</Font></Td>
+<Td><Font Size=-1>Table of configurations for the cameras that could be connected by this device.
+Format is:
+label:ip address:offset_pos:gain_pos:img depth:exposure:gain:binning:updown:mirror:trigger mode:pixelXmm hor:pixelXmm ver: hor mech offset: ver mech offset
+
+For example:
+pil_camera_p1.1:192.168.1.10:10:0.01:8:10:350:1:0:0:1:15:10:0:0</Font></Td></Tr>
+
+<Tr><Td><b><a href=#Dev_DefaultValues>AutoRoi </a></b></Td>
+<Td><Font Size=-1>Tango::DEV_BOOLEAN</Font></Td>
+<Td><Font Size=-1>Enable autoroi (to minimize the area used for image processing</Font></Td></Tr>
+
+<Tr><Td><b><a href=#Dev_DefaultValues>AutoRoiParam </a></b></Td>
+<Td><Font Size=-1>Array of double</Font></Td>
+<Td><Font Size=-1>Parameters for autoroi configuration algorithm.
+param[0]=image decimation size (10 -> max image size)
+param[1]=low pass filter (1-10)
+param[2]=intensity threshold (0-10)</Font></Td></Tr>
+
+<Tr><Td><b><a href=#Dev_DefaultValues>ImageProcessing </a></b></Td>
+<Td><Font Size=-1>Tango::DEV_BOOLEAN</Font></Td>
+<Td><Font Size=-1>Enable image processing</Font></Td></Tr>
+
+<Tr><Td><b><a href=#Dev_DefaultValues>PlotMode </a></b></Td>
+<Td><Font Size=-1>Array of short</Font></Td>
+<Td><Font Size=-1>Set plot mode:
+short[0]=  0x1=plot axis & roi 0x2=plot spot contour 0x3=plot axis and spot contour
+short[1]= plot color</Font></Td></Tr>
+
+<Tr><Td><b><a href=#Dev_DefaultValues>FastCalculation </a></b></Td>
+<Td><Font Size=-1>Tango::DEV_BOOLEAN</Font></Td>
+<Td><Font Size=-1>Enable fast calculation algorithm.
+</Font></Td></Tr>
+
+<Tr><Td><b><a href=#Dev_DefaultValues>ImageBufferSize </a></b></Td>
+<Td><Font Size=-1>Tango::DEV_SHORT</Font></Td>
+<Td><Font Size=-1>Number of images stored in the circular buffer</Font></Td></Tr>
+
+<Tr><Td><b><a href=#Dev_DefaultValues>DataBufferSize </a></b></Td>
+<Td><Font Size=-1>Tango::DEV_LONG</Font></Td>
+<Td><Font Size=-1>Number of samples stored in the circular buffer for main parameters (horpos,verpos</Font></Td></Tr>
+
+<Tr><Td><b><a href=#Dev_DefaultValues>SearchBackgroundParam </a></b></Td>
+<Td><Font Size=-1>Array of double</Font></Td>
+<Td><Font Size=-1>Search background parameters:
+double[0]=number of background levels
+double[1]=derivative factor</Font></Td></Tr>
+
+<Tr><Td><b><a href=#Dev_DefaultValues>RnmEnabled </a></b></Td>
+<Td><Font Size=-1>Tango::DEV_BOOLEAN</Font></Td>
+<Td><Font Size=-1>Enable rnm data support</Font></Td></Tr>
+
+<Tr><Td><b><a href=#Dev_DefaultValues>AutoConnect </a></b></Td>
+<Td><Font Size=-1>Tango::DEV_BOOLEAN</Font></Td>
+<Td><Font Size=-1>If true connect to a camera when the device starts. (There must be only one camera supported).</Font></Td></Tr>
+
+<Tr><Td><b><a href=#Dev_DefaultValues>RnmIndex </a></b></Td>
+<Td><Font Size=-1>Tango::DEV_LONG</Font></Td>
+<Td><Font Size=-1>Rnm index of camera</Font></Td></Tr>
+
+<Tr><Td><b><a href=#Dev_DefaultValues>ProcessMode </a></b></Td>
+<Td><Font Size=-1>Tango::DEV_LONG</Font></Td>
+<Td><Font Size=-1>0=raw
+1=gaussian fit
+2=gaussian asymmetric
+4=confiteor</Font></Td></Tr>
+
+</Table>
+
+</Center>
+<Br><Br><Br>
+<Br><Br><Br>
+
+<A name=Dev_DefaultValues><!---  ---></a>
+<Font Size=+1>Device Properties Default Values:</Font><Br>
+<Table Border=2 Cellpadding=2 CELLSPACING=2>
+    <tr BGCOLOR="#CCCCFF" CLASS="TableHeadingColor">
+        <Td><b>Property Name</b></td>
+        <td><b>Default Values</b></td>
+    </Tr>
+    <Tr>
+        <Td>Configuration</Td>
+        <td>No default value</td>
+    </Tr>
+    <Tr>
+        <Td>AutoRoi</Td>
+        <td>true</td>
+    </Tr>
+    <Tr>
+        <Td>AutoRoiParam</Td>
+        <td>50, 5, 1</td>
+    </Tr>
+    <Tr>
+        <Td>ImageProcessing</Td>
+        <td>true</td>
+    </Tr>
+    <Tr>
+        <Td>PlotMode</Td>
+        <td>3, 0</td>
+    </Tr>
+    <Tr>
+        <Td>FastCalculation</Td>
+        <td>No default value</td>
+    </Tr>
+    <Tr>
+        <Td>ImageBufferSize</Td>
+        <td>100</td>
+    </Tr>
+    <Tr>
+        <Td>DataBufferSize</Td>
+        <td>No default value</td>
+    </Tr>
+    <Tr>
+        <Td>SearchBackgroundParam</Td>
+        <td>20, 0.4</td>
+    </Tr>
+    <Tr>
+        <Td>RnmEnabled</Td>
+        <td>false</td>
+    </Tr>
+    <Tr>
+        <Td>AutoConnect</Td>
+        <td>false</td>
+    </Tr>
+    <Tr>
+        <Td>RnmIndex</Td>
+        <td>-1</td>
+    </Tr>
+    <Tr>
+        <Td>ProcessMode</Td>
+        <td>0</td>
+    </Tr>
+</Table>
+
+<Br><Br><Br>
+<Center><b>
+There is no Class properties.<Br><Br>
+</Center></b>
+<Br> <Br> <Br> 
+
+
+</center>
+<Br>&nbsp;<Br><Br>&nbsp;<Br><h2>States:</h2>
+
+
+<Center>
+<Br> <Br> <Br> 
+<Table Border=2 Cellpadding=3 CELLSPACING=0 WIDTH="100%">
+<TR BGCOLOR="#CCCCFF" CLASS="TableHeadingColor">
+<Td COLSPAN=2> <Font Size=+2><Center><b>States</b></td></Font></Center>
+<TR BGCOLOR="#CCCCFF" CLASS="TableHeadingColor">
+<Td><Center><b>Names</b></td></Center>
+<Td><Center><b>Descriptions</b></td></Center>
+<Tr><Td><b>ON</b></Td>
+<Td><Font Size=-1>The server is up anc connected to a camera</Font></Td></Tr>
+
+<Tr><Td><b>OFF</b></Td>
+<Td><Font Size=-1>the server is up but it isn't connected to any camera</Font></Td></Tr>
+
+<Tr><Td><b>FAULT</b></Td>
+<Td><Font Size=-1>A camera doesn't respond or the external trigger is missing (if the camera is configured with external trigger).</Font></Td></Tr>
+
+<Tr><Td><b>ALARM</b></Td>
+<Td><Font Size=-1>When the saturation level reaches 10% (0.1) the server status goes in alarm state.</Font></Td></Tr>
+
+
+
+
+</Table>
+</Center>
+
+
+</center>
+<Br>&nbsp;<Br><Br>&nbsp;<Br><h2>Attributes:</h2>
+
+
+<Br>
+<Table Border=2 Cellpadding=3 CELLSPACING=0 WIDTH="100%">
+<TR BGCOLOR="#CCCCFF" CLASS="TableHeadingColor">
+<Td COLSPAN=4> <Font Size=+2><Center><b>Scalar Attributes</b></td></Font></Center>
+<TR BGCOLOR="#CCCCFF" CLASS="TableHeadingColor">
+<Td><Center><b>Attribute name</b></td></Center>
+<Td><Center><b>Data Type</b></td></Center>
+<Td><Center><b>R/W Type</b></td></Center>
+<Td><Center><b>Expert</b></td></Center>
+<Font Size=-1>
+<Tr><Td><b>HorPos</b>: <Font Size=-1>Horizontal position of the spot int the image. (Measure)</Font></Td>
+<Td><Center><Font Size=-1>DEV_DOUBLE</Font></Center></Td><Td><Center><Font Size=-1>READ</Font></Center></Td><Td><Center><Font Size=-1>No</Font></Center></Td></Tr>
+
+<Font Size=-1>
+<Tr><Td><b>VerPos</b>: <Font Size=-1>Horizontal position of the spot int the image.(Measure)</Font></Td>
+<Td><Center><Font Size=-1>DEV_DOUBLE</Font></Center></Td><Td><Center><Font Size=-1>READ</Font></Center></Td><Td><Center><Font Size=-1>No</Font></Center></Td></Tr>
+
+<Font Size=-1>
+<Tr><Td><b>MaxVal</b>: <Font Size=-1>Maximum pixel value.(Measure)</Font></Td>
+<Td><Center><Font Size=-1>DEV_LONG</Font></Center></Td><Td><Center><Font Size=-1>READ</Font></Center></Td><Td><Center><Font Size=-1>No</Font></Center></Td></Tr>
+
+<Font Size=-1>
+<Tr><Td><b>CountMaxVal</b>: <Font Size=-1>Number of pixels equal to the maximum pixel value (255/4095).(Measure)</Font></Td>
+<Td><Center><Font Size=-1>DEV_LONG</Font></Center></Td><Td><Center><Font Size=-1>READ</Font></Center></Td><Td><Center><Font Size=-1>No</Font></Center></Td></Tr>
+
+<Font Size=-1>
+<Tr><Td><b>HorSigma</b>: <Font Size=-1>Horizontal standard deviation of the spot in the image.(Measure)</Font></Td>
+<Td><Center><Font Size=-1>DEV_DOUBLE</Font></Center></Td><Td><Center><Font Size=-1>READ</Font></Center></Td><Td><Center><Font Size=-1>No</Font></Center></Td></Tr>
+
+<Font Size=-1>
+<Tr><Td><b>VerSigma</b>: <Font Size=-1>Vertical standard deviation of the spot in the image.(Measure)</Font></Td>
+<Td><Center><Font Size=-1>DEV_DOUBLE</Font></Center></Td><Td><Center><Font Size=-1>READ</Font></Center></Td><Td><Center><Font Size=-1>No</Font></Center></Td></Tr>
+
+<Font Size=-1>
+<Tr><Td><b>Area</b>: <Font Size=-1>Area of the spot inside the roi.(Measure)</Font></Td>
+<Td><Center><Font Size=-1>DEV_DOUBLE</Font></Center></Td><Td><Center><Font Size=-1>READ</Font></Center></Td><Td><Center><Font Size=-1>No</Font></Center></Td></Tr>
+
+<Font Size=-1>
+<Tr><Td><b>HVCovar</b>: <Font Size=-1>Covariance between horizontal and vertical plane.(Measure)</Font></Td>
+<Td><Center><Font Size=-1>DEV_DOUBLE</Font></Center></Td><Td><Center><Font Size=-1>READ</Font></Center></Td><Td><Center><Font Size=-1>No</Font></Center></Td></Tr>
+
+<Font Size=-1>
+<Tr><Td><b>CameraCounter</b>: <Font Size=-1>Camera counter (0-65535).(Connection Diagnostics)</Font></Td>
+<Td><Center><Font Size=-1>DEV_LONG</Font></Center></Td><Td><Center><Font Size=-1>READ</Font></Center></Td><Td><Center><Font Size=-1>No</Font></Center></Td></Tr>
+
+<Font Size=-1>
+<Tr><Td><b>AcquisitionCounter</b>: <Font Size=-1>Absolute acquisition image counter.(Connection Diagnostics)</Font></Td>
+<Td><Center><Font Size=-1>DEV_LONG</Font></Center></Td><Td><Center><Font Size=-1>READ</Font></Center></Td><Td><Center><Font Size=-1>No</Font></Center></Td></Tr>
+
+<Font Size=-1>
+<Tr><Td><b>Height</b>: <Font Size=-1>Image height</Font></Td>
+<Td><Center><Font Size=-1>DEV_LONG</Font></Center></Td><Td><Center><Font Size=-1>READ</Font></Center></Td><Td><Center><Font Size=-1>No</Font></Center></Td></Tr>
+
+<Font Size=-1>
+<Tr><Td><b>Width</b>: <Font Size=-1>Image width</Font></Td>
+<Td><Center><Font Size=-1>DEV_LONG</Font></Center></Td><Td><Center><Font Size=-1>READ</Font></Center></Td><Td><Center><Font Size=-1>No</Font></Center></Td></Tr>
+
+<Font Size=-1>
+<Tr><Td><b>ProcessingTime</b>: <Font Size=-1>Processing time in us.(Processing Setup)</Font></Td>
+<Td><Center><Font Size=-1>DEV_LONG</Font></Center></Td><Td><Center><Font Size=-1>READ</Font></Center></Td><Td><Center><Font Size=-1>No</Font></Center></Td></Tr>
+
+<Font Size=-1>
+<Tr><Td><b>Frequency</b>: <Font Size=-1>Frame rate in Hz. (Camera Setup)</Font></Td>
+<Td><Center><Font Size=-1>DEV_DOUBLE</Font></Center></Td><Td><Center><Font Size=-1>READ</Font></Center></Td><Td><Center><Font Size=-1>No</Font></Center></Td></Tr>
+
+<Font Size=-1>
+<Tr><Td><b>Trigger</b>: <Font Size=-1>Trigger mode (Camera Setup) false = internal trigger (max frame rate) true = external trigger The trigger will be on the rising edge of the pulse.</Font></Td>
+<Td><Center><Font Size=-1>DEV_BOOLEAN</Font></Center></Td><Td><Center><Font Size=-1>READ_WRITE</Font></Center></Td><Td><Center><Font Size=-1>No</Font></Center></Td></Tr>
+
+<Font Size=-1>
+<Tr><Td><b>Exposure</b>: <Font Size=-1>Exposure time in us.(Camera Setup)</Font></Td>
+<Td><Center><Font Size=-1>DEV_LONG</Font></Center></Td><Td><Center><Font Size=-1>READ_WRITE</Font></Center></Td><Td><Center><Font Size=-1>No</Font></Center></Td></Tr>
+
+<Font Size=-1>
+<Tr><Td><b>Gain</b>: <Font Size=-1>Gain value in dB.</Font></Td>
+<Td><Center><Font Size=-1>DEV_DOUBLE</Font></Center></Td><Td><Center><Font Size=-1>READ_WRITE</Font></Center></Td><Td><Center><Font Size=-1>No</Font></Center></Td></Tr>
+
+<Font Size=-1>
+<Tr><Td><b>RoiThreshold</b>: <Font Size=-1>Scaling factor of the automatic roi threshold. Automatic roi threshol is the background level that is automatically found by autoroi routine.(Processing Setup)</Font></Td>
+<Td><Center><Font Size=-1>DEV_DOUBLE</Font></Center></Td><Td><Center><Font Size=-1>READ_WRITE</Font></Center></Td><Td><Center><Font Size=-1>No</Font></Center></Td></Tr>
+
+<Font Size=-1>
+<Tr><Td><b>AutoRoi</b>: <Font Size=-1>Enable autoroi. Autoroi routine find the background level and the roi region where the spot is. When swroi is enabled also, the roi is the roi defined by the user by roiparam attribute but the background level is automatically calculated and taken into accout in position and standard deviation calculations.(Processing Setup)</Font></Td>
+<Td><Center><Font Size=-1>DEV_BOOLEAN</Font></Center></Td><Td><Center><Font Size=-1>READ_WRITE</Font></Center></Td><Td><Center><Font Size=-1>No</Font></Center></Td></Tr>
+
+<Font Size=-1>
+<Tr><Td><b>SwRoi</b>: <Font Size=-1>Enable roi define by the user.(Display Options) </Font></Td>
+<Td><Center><Font Size=-1>DEV_BOOLEAN</Font></Center></Td><Td><Center><Font Size=-1>READ_WRITE</Font></Center></Td><Td><Center><Font Size=-1>No</Font></Center></Td></Tr>
+
+<Font Size=-1>
+<Tr><Td><b>HwRoi</b></Td>
+<Td><Center><Font Size=-1>DEV_BOOLEAN</Font></Center></Td><Td><Center><Font Size=-1>READ_WRITE</Font></Center></Td><Td><Center><Font Size=-1>No</Font></Center></Td></Tr>
+
+<Font Size=-1>
+<Tr><Td><b>PlotMode</b>: <Font Size=-1>Set plotting mode.(Display Options) 0x0: plot nothing 0x1:plot position axis and roi region 0x2:plot spot region 0x3: plot both</Font></Td>
+<Td><Center><Font Size=-1>DEV_SHORT</Font></Center></Td><Td><Center><Font Size=-1>READ_WRITE</Font></Center></Td><Td><Center><Font Size=-1>No</Font></Center></Td></Tr>
+
+<Font Size=-1>
+<Tr><Td><b>IconSize</b>: <Font Size=-1>Horizontal size of the decimated image used to find automatically the roi. (Shadow Parameters)</Font></Td>
+<Td><Center><Font Size=-1>DEV_LONG</Font></Center></Td><Td><Center><Font Size=-1>READ_WRITE</Font></Center></Td><Td><Center><Font Size=-1>No</Font></Center></Td></Tr>
+
+<Font Size=-1>
+<Tr><Td><b>LowPassOrder</b>: <Font Size=-1>Low pass fiter order used to magnify the main spot on the camera. (Shadow Parameters)</Font></Td>
+<Td><Center><Font Size=-1>DEV_SHORT</Font></Center></Td><Td><Center><Font Size=-1>READ_WRITE</Font></Center></Td><Td><Center><Font Size=-1>No</Font></Center></Td></Tr>
+
+<Font Size=-1>
+<Tr><Td><b>Rotation</b>: <Font Size=-1>Image rotation in degrees. (Display Options)</Font></Td>
+<Td><Center><Font Size=-1>DEV_DOUBLE</Font></Center></Td><Td><Center><Font Size=-1>READ_WRITE</Font></Center></Td><Td><Center><Font Size=-1>No</Font></Center></Td></Tr>
+
+<Font Size=-1>
+<Tr><Td><b>Mirror</b>: <Font Size=-1>Mirror the image (true) on the horizontal plane. (Display Options)</Font></Td>
+<Td><Center><Font Size=-1>DEV_BOOLEAN</Font></Center></Td><Td><Center><Font Size=-1>READ_WRITE</Font></Center></Td><Td><Center><Font Size=-1>No</Font></Center></Td></Tr>
+
+<Font Size=-1>
+<Tr><Td><b>ImageDepth</b>: <Font Size=-1>Image depth. Valide values are 8 o 16.(Camera Setup)</Font></Td>
+<Td><Center><Font Size=-1>DEV_SHORT</Font></Center></Td><Td><Center><Font Size=-1>READ_WRITE</Font></Center></Td><Td><Center><Font Size=-1>No</Font></Center></Td></Tr>
+
+<Font Size=-1>
+<Tr><Td><b>BackgroundSubtraction</b>: <Font Size=-1>Enable (true) background subtraction. (Processing Setup)</Font></Td>
+<Td><Center><Font Size=-1>DEV_BOOLEAN</Font></Center></Td><Td><Center><Font Size=-1>READ_WRITE</Font></Center></Td><Td><Center><Font Size=-1>No</Font></Center></Td></Tr>
+
+<Font Size=-1>
+<Tr><Td><b>EnableProcessing</b>: <Font Size=-1>Enable (true) image processing.(Processing Setup)</Font></Td>
+<Td><Center><Font Size=-1>DEV_BOOLEAN</Font></Center></Td><Td><Center><Font Size=-1>READ_WRITE</Font></Center></Td><Td><Center><Font Size=-1>No</Font></Center></Td></Tr>
+
+<Font Size=-1>
+<Tr><Td><b>FastProcessing</b>: <Font Size=-1>Enable fast processing. Image processing will be done automatically on a  decimate (binning) image to reduce computation time. (Processing Setup)</Font></Td>
+<Td><Center><Font Size=-1>DEV_BOOLEAN</Font></Center></Td><Td><Center><Font Size=-1>READ_WRITE</Font></Center></Td><Td><Center><Font Size=-1>No</Font></Center></Td></Tr>
+
+<Font Size=-1>
+<Tr><Td><b>Saturation</b>: <Font Size=-1>Ratio between the number of the pixels that reached the maximum value and the number of the pixels of the spot.(Measure)</Font></Td>
+<Td><Center><Font Size=-1>DEV_DOUBLE</Font></Center></Td><Td><Center><Font Size=-1>READ</Font></Center></Td><Td><Center><Font Size=-1>No</Font></Center></Td></Tr>
+
+<Font Size=-1>
+<Tr><Td><b>PlotLevel</b>: <Font Size=-1>Color of the plots (0-255 8bit) (0-4095 16bit).(Display Options)</Font></Td>
+<Td><Center><Font Size=-1>DEV_SHORT</Font></Center></Td><Td><Center><Font Size=-1>READ_WRITE</Font></Center></Td><Td><Center><Font Size=-1>No</Font></Center></Td></Tr>
+
+<Font Size=-1>
+<Tr><Td><b>Pause</b>: <Font Size=-1>Pause the image acquisition but don't give up the connection with the camera. (Camera Control)</Font></Td>
+<Td><Center><Font Size=-1>DEV_BOOLEAN</Font></Center></Td><Td><Center><Font Size=-1>READ_WRITE</Font></Center></Td><Td><Center><Font Size=-1>No</Font></Center></Td></Tr>
+
+<Font Size=-1>
+<Tr><Td><b>Label</b>: <Font Size=-1>Label of the camera currently acquired. It corresponds to the first element of the row of the table which contains the camera initialization paramenters.(Camera Control) </Font></Td>
+<Td><Center><Font Size=-1>DEV_STRING</Font></Center></Td><Td><Center><Font Size=-1>READ</Font></Center></Td><Td><Center><Font Size=-1>No</Font></Center></Td></Tr>
+
+<Font Size=-1>
+<Tr><Td><b>HorPosRelative</b>: <Font Size=-1>Horizontal relative position of the spot int the image. (Measure)</Font></Td>
+<Td><Center><Font Size=-1>DEV_DOUBLE</Font></Center></Td><Td><Center><Font Size=-1>READ</Font></Center></Td><Td><Center><Font Size=-1>No</Font></Center></Td></Tr>
+
+<Font Size=-1>
+<Tr><Td><b>VerPosRelative</b>: <Font Size=-1>Vertical relative position of the spot int the image. (Measure)</Font></Td>
+<Td><Center><Font Size=-1>DEV_DOUBLE</Font></Center></Td><Td><Center><Font Size=-1>READ</Font></Center></Td><Td><Center><Font Size=-1>No</Font></Center></Td></Tr>
+
+<Font Size=-1>
+<Tr><Td><b>Phase</b>: <Font Size=-1>Inclination in degrees of the image.(Measure)</Font></Td>
+<Td><Center><Font Size=-1>DEV_DOUBLE</Font></Center></Td><Td><Center><Font Size=-1>READ</Font></Center></Td><Td><Center><Font Size=-1>No</Font></Center></Td></Tr>
+
+<Font Size=-1>
+<Tr><Td><b>ScaleHor</b>: <Font Size=-1>Set the number of pixels per mm in the horizontal plane</Font></Td>
+<Td><Center><Font Size=-1>DEV_DOUBLE</Font></Center></Td><Td><Center><Font Size=-1>READ_WRITE</Font></Center></Td><Td><Center><Font Size=-1>No</Font></Center></Td></Tr>
+
+<Font Size=-1>
+<Tr><Td><b>ScaleVer</b>: <Font Size=-1>Set the number of pixels per mm in the vertical plane</Font></Td>
+<Td><Center><Font Size=-1>DEV_DOUBLE</Font></Center></Td><Td><Center><Font Size=-1>READ_WRITE</Font></Center></Td><Td><Center><Font Size=-1>No</Font></Center></Td></Tr>
+
+<Font Size=-1>
+<Tr><Td><b>OffsetHor</b>: <Font Size=-1>Horizontal mechanical offset in mm</Font></Td>
+<Td><Center><Font Size=-1>DEV_DOUBLE</Font></Center></Td><Td><Center><Font Size=-1>READ_WRITE</Font></Center></Td><Td><Center><Font Size=-1>No</Font></Center></Td></Tr>
+
+<Font Size=-1>
+<Tr><Td><b>OffsetVer</b>: <Font Size=-1>Vertical mechanical offset in mm</Font></Td>
+<Td><Center><Font Size=-1>DEV_DOUBLE</Font></Center></Td><Td><Center><Font Size=-1>READ_WRITE</Font></Center></Td><Td><Center><Font Size=-1>No</Font></Center></Td></Tr>
+
+<Font Size=-1>
+<Tr><Td><b>PlotOffsetAxis</b>: <Font Size=-1>Plot reference position axis. Reference position coordinates are (OffsetHor,OffsetVer)</Font></Td>
+<Td><Center><Font Size=-1>DEV_BOOLEAN</Font></Center></Td><Td><Center><Font Size=-1>READ_WRITE</Font></Center></Td><Td><Center><Font Size=-1>No</Font></Center></Td></Tr>
+
+<Font Size=-1>
+<Tr><Td><b>Intensity</b>: <Font Size=-1>Sum of pixel values inside the roi</Font></Td>
+<Td><Center><Font Size=-1>DEV_DOUBLE</Font></Center></Td><Td><Center><Font Size=-1>READ</Font></Center></Td><Td><Center><Font Size=-1>No</Font></Center></Td></Tr>
+
+<Font Size=-1>
+<Tr><Td><b>SignHor</b>: <Font Size=-1>Horizontal versus of the axis (1,-1)</Font></Td>
+<Td><Center><Font Size=-1>DEV_DOUBLE</Font></Center></Td><Td><Center><Font Size=-1>READ</Font></Center></Td><Td><Center><Font Size=-1>No</Font></Center></Td></Tr>
+
+<Font Size=-1>
+<Tr><Td><b>SignVer</b>: <Font Size=-1>Vertical versus of the axis (1,-1)</Font></Td>
+<Td><Center><Font Size=-1>DEV_DOUBLE</Font></Center></Td><Td><Center><Font Size=-1>READ</Font></Center></Td><Td><Center><Font Size=-1>No</Font></Center></Td></Tr>
+
+<Font Size=-1>
+<Tr><Td><b>ProcessMode</b>: <Font Size=-1>Processing mode: 0=raw rms 1=gaussian fit 2=asymmetric gaussian fit 3=confiteor</Font></Td>
+<Td><Center><Font Size=-1>DEV_LONG</Font></Center></Td><Td><Center><Font Size=-1>READ_WRITE</Font></Center></Td><Td><Center><Font Size=-1>No</Font></Center></Td></Tr>
+
+<Font Size=-1>
+<Tr><Td><b>DebugThread</b></Td>
+<Td><Center><Font Size=-1>DEV_LONG</Font></Center></Td><Td><Center><Font Size=-1>READ</Font></Center></Td><Td><Center><Font Size=-1>No</Font></Center></Td></Tr>
+
+</Table>
+</Center>
+<Br><Br><Br><Br><Br>
+<Table Border=2 Cellpadding=3 CELLSPACING=0 WIDTH="100%">
+<TR BGCOLOR="#CCCCFF" CLASS="TableHeadingColor">
+<Td COLSPAN=4> <Font Size=+2><Center><b>Spectrum Attributes</b></td></Font></Center>
+<TR BGCOLOR="#CCCCFF" CLASS="TableHeadingColor">
+<Td><Center><b>Attribute name</b></td></Center>
+<Td><Center><b>Data Type</b></td></Center>
+<Td><Center><b>X Data Length</b></td></Center>
+<Td><Center><b>Expert</b></td></Center>
+<Tr><Td><b>SearchBackgroundParam</b>: <Font Size=-1>param[0]: number of background levels param[1]: derivative percentage threshold</Font></Td>
+<Td><Center><Font Size=-1>DEV_DOUBLE</Font></Center></Td><Td><Center><Font Size=-1>2</Font></Center></Td><Td><Center><Font Size=-1>No</Font></Center></Td></Tr>
+
+<Tr><Td><b>HorProfile</b>: <Font Size=-1>Horizontal profile of the image.(Measure)</Font></Td>
+<Td><Center><Font Size=-1>DEV_DOUBLE</Font></Center></Td><Td><Center><Font Size=-1>3000</Font></Center></Td><Td><Center><Font Size=-1>No</Font></Center></Td></Tr>
+
+<Tr><Td><b>VerProfile</b>: <Font Size=-1>Vertical profile of the image.(Measure)</Font></Td>
+<Td><Center><Font Size=-1>DEV_DOUBLE</Font></Center></Td><Td><Center><Font Size=-1>3000</Font></Center></Td><Td><Center><Font Size=-1>No</Font></Center></Td></Tr>
+
+<Tr><Td><b>ErrorCounters</b>: <Font Size=-1>Error counters: counter[0]: acquisition error counter[1]: packets lost counter[2]: packets canceled (Connection Diagnostics)</Font></Td>
+<Td><Center><Font Size=-1>DEV_LONG</Font></Center></Td><Td><Center><Font Size=-1>10</Font></Center></Td><Td><Center><Font Size=-1>No</Font></Center></Td></Tr>
+
+<Tr><Td><b>TimeStamp</b>: <Font Size=-1>Current timestamp (unix time) of the current image</Font></Td>
+<Td><Center><Font Size=-1>DEV_LONG</Font></Center></Td><Td><Center><Font Size=-1>2</Font></Center></Td><Td><Center><Font Size=-1>No</Font></Center></Td></Tr>
+
+<Tr><Td><b>AutoRoiParam</b>: <Font Size=-1>Coordinates of the automatic roi (x1,y1,x2,y2)</Font></Td>
+<Td><Center><Font Size=-1>DEV_LONG</Font></Center></Td><Td><Center><Font Size=-1>4</Font></Center></Td><Td><Center><Font Size=-1>No</Font></Center></Td></Tr>
+
+<Tr><Td><b>RoiParam</b>: <Font Size=-1>Coordinates of the manual roi(x1,y1,x2,y2). (Display Options)</Font></Td>
+<Td><Center><Font Size=-1>DEV_LONG</Font></Center></Td><Td><Center><Font Size=-1>4</Font></Center></Td><Td><Center><Font Size=-1>No</Font></Center></Td></Tr>
+
+<Tr><Td><b>HorFitProfile</b>: <Font Size=-1>Horizontal profile of the image.(Measure)</Font></Td>
+<Td><Center><Font Size=-1>DEV_DOUBLE</Font></Center></Td><Td><Center><Font Size=-1>3000</Font></Center></Td><Td><Center><Font Size=-1>No</Font></Center></Td></Tr>
+
+<Tr><Td><b>VerFitProfile</b>: <Font Size=-1>Horizontal profile of the image.(Measure)</Font></Td>
+<Td><Center><Font Size=-1>DEV_DOUBLE</Font></Center></Td><Td><Center><Font Size=-1>3000</Font></Center></Td><Td><Center><Font Size=-1>No</Font></Center></Td></Tr>
+
+</Table>
+</Center>
+<Br><Br><Br><Br><Br>
+<Table Border=2 Cellpadding=3 CELLSPACING=0 WIDTH="100%">
+<TR BGCOLOR="#CCCCFF" CLASS="TableHeadingColor">
+<Td COLSPAN=5> <Font Size=+2><Center><b>Image Attributes</b></td></Font></Center>
+<TR BGCOLOR="#CCCCFF" CLASS="TableHeadingColor">
+<Td><Center><b>Attribute name</b></td></Center>
+<Td><Center><b>Data Type</b></td></Center>
+<Td><Center><b>X Data Length</b></td></Center>
+<Td><Center><b>Y Data Length</b></td></Center>
+<Td><Center><b>Expert</b></td></Center>
+<Tr><Td><b>Image8</b>: <Font Size=-1>Image (8bit depth) of the camera.</Font></Td>
+<Td><Center><Font Size=-1>DEV_UCHAR</Font></Center></Td><Td><Center><Font Size=-1>3000</Font></Center></Td><Td><Center><Font Size=-1>3000</Font></Center></Td><Td><Center><Font Size=-1>No</Font></Center></Td></Tr>
+
+<Tr><Td><b>Image8Icon</b>: <Font Size=-1>Decimated version of the image used to find the roi region</Font></Td>
+<Td><Center><Font Size=-1>DEV_LONG</Font></Center></Td><Td><Center><Font Size=-1>400</Font></Center></Td><Td><Center><Font Size=-1>400</Font></Center></Td><Td><Center><Font Size=-1>No</Font></Center></Td></Tr>
+
+<Tr><Td><b>Image16</b>: <Font Size=-1>Image (18bit depth) of the camera</Font></Td>
+<Td><Center><Font Size=-1>DEV_USHORT</Font></Center></Td><Td><Center><Font Size=-1>3000</Font></Center></Td><Td><Center><Font Size=-1>3000</Font></Center></Td><Td><Center><Font Size=-1>No</Font></Center></Td></Tr>
+
+<Tr><Td><b>Image16Icon</b>: <Font Size=-1>Decimated version of the image used to find the roi region</Font></Td>
+<Td><Center><Font Size=-1>DEV_LONG</Font></Center></Td><Td><Center><Font Size=-1>400</Font></Center></Td><Td><Center><Font Size=-1>400</Font></Center></Td><Td><Center><Font Size=-1>No</Font></Center></Td></Tr>
+
+</Table>
+</Center>
+
+
+</center>
+<Br>&nbsp;<Br><Br>&nbsp;<Br><h2>Commands:</h2>
+
+
+<Center>
+<Br><Br>
+<A Href="DevCommandsFrame.html"> More Details on commands.... </a><Br>
+<Br> <Br>
+<Table Border=2 Cellpadding=3 CELLSPACING=0 WIDTH="100%">
+<TR BGCOLOR="#CCCCFF" CLASS="TableHeadingColor">
+<Td COLSPAN=3> <Font Size=+2><Center><b>Device Commands for Operator Level</b></td></Font></Center>
+<TR BGCOLOR="#CCCCFF" CLASS="TableHeadingColor">
+<Td><Center><b>Command name</b></td></Center>
+<Td><Center><b>Argument In</b></td></Center>
+<Td><Center><b>Argument Out</b></td></Center>
+<Tr><Td><b>Init</b></Td>
+<Td><Font Size=-1>DEV_VOID</Font></Td>
+<Td><Font Size=-1>DEV_VOID</Font></Td>
+<Tr><Td><b>State</b></Td>
+<Td><Font Size=-1>DEV_VOID</Font></Td>
+<Td><Font Size=-1>DEV_STATE</Font></Td>
+<Tr><Td><b>Status</b></Td>
+<Td><Font Size=-1>DEV_VOID</Font></Td>
+<Td><Font Size=-1>CONST_DEV_STRING</Font></Td>
+<Tr><Td><b>Start</b></Td>
+<Td><Font Size=-1>DEV_STRING</Font></Td>
+<Td><Font Size=-1>DEV_VOID</Font></Td>
+<Tr><Td><b>Stop</b></Td>
+<Td><Font Size=-1>DEV_VOID</Font></Td>
+<Td><Font Size=-1>DEV_VOID</Font></Td>
+<Tr><Td><b>Reset</b></Td>
+<Td><Font Size=-1>DEV_VOID</Font></Td>
+<Td><Font Size=-1>DEV_VOID</Font></Td>
+<Tr><Td><b>ListCamera</b></Td>
+<Td><Font Size=-1>DEV_VOID</Font></Td>
+<Td><Font Size=-1>DEVVAR_STRINGARRAY</Font></Td>
+<Tr><Td><b>AcquireBackground</b></Td>
+<Td><Font Size=-1>DEV_VOID</Font></Td>
+<Td><Font Size=-1>DEV_VOID</Font></Td>
+<Tr><Td><b>GetImage8</b></Td>
+<Td><Font Size=-1>DEVVAR_LONGARRAY</Font></Td>
+<Td><Font Size=-1>DEVVAR_CHARARRAY</Font></Td>
+<Tr><Td><b>GetImage16</b></Td>
+<Td><Font Size=-1>DEVVAR_LONGARRAY</Font></Td>
+<Td><Font Size=-1>DEVVAR_USHORTARRAY</Font></Td>
+<Tr><Td><b>GetHorPos</b></Td>
+<Td><Font Size=-1>DEVVAR_LONGARRAY</Font></Td>
+<Td><Font Size=-1>DEVVAR_DOUBLEARRAY</Font></Td>
+<Tr><Td><b>GetVerPos</b></Td>
+<Td><Font Size=-1>DEVVAR_LONGARRAY</Font></Td>
+<Td><Font Size=-1>DEVVAR_DOUBLEARRAY</Font></Td>
+<Tr><Td><b>GetHorSigma</b></Td>
+<Td><Font Size=-1>DEVVAR_LONGARRAY</Font></Td>
+<Td><Font Size=-1>DEVVAR_DOUBLEARRAY</Font></Td>
+<Tr><Td><b>GetVerSigma</b></Td>
+<Td><Font Size=-1>DEVVAR_LONGARRAY</Font></Td>
+<Td><Font Size=-1>DEVVAR_DOUBLEARRAY</Font></Td>
+<Tr><Td><b>GetArea</b></Td>
+<Td><Font Size=-1>DEVVAR_LONGARRAY</Font></Td>
+<Td><Font Size=-1>DEVVAR_DOUBLEARRAY</Font></Td>
+<Tr><Td><b>GetAcquisitionCounter</b></Td>
+<Td><Font Size=-1>DEVVAR_LONGARRAY</Font></Td>
+<Td><Font Size=-1>DEVVAR_LONGARRAY</Font></Td>
+<Tr><Td><b>GetSaturation</b></Td>
+<Td><Font Size=-1>DEVVAR_LONGARRAY</Font></Td>
+<Td><Font Size=-1>DEVVAR_DOUBLEARRAY</Font></Td>
+<Tr><Td><b>SetReference</b></Td>
+<Td><Font Size=-1>DEV_VOID</Font></Td>
+<Td><Font Size=-1>DEV_VOID</Font></Td>
+<Tr><Td><b>GetPhase</b></Td>
+<Td><Font Size=-1>DEVVAR_LONGARRAY</Font></Td>
+<Td><Font Size=-1>DEVVAR_DOUBLEARRAY</Font></Td>
+<Tr><Td><b>SaveScale</b></Td>
+<Td><Font Size=-1>DEV_VOID</Font></Td>
+<Td><Font Size=-1>DEV_VOID</Font></Td>
+<Tr><Td><b>RestoreScale</b></Td>
+<Td><Font Size=-1>DEV_VOID</Font></Td>
+<Td><Font Size=-1>DEV_VOID</Font></Td>
+<Tr><Td><b>SetMeasurePoint</b></Td>
+<Td><Font Size=-1>DEVVAR_LONGARRAY</Font></Td>
+<Td><Font Size=-1>DEV_VOID</Font></Td>
+<Tr><Td><b>ClearMeasurePoints</b></Td>
+<Td><Font Size=-1>DEV_VOID</Font></Td>
+<Td><Font Size=-1>DEV_VOID</Font></Td>
+<Tr><Td><b>GetIntensity</b></Td>
+<Td><Font Size=-1>DEVVAR_LONGARRAY</Font></Td>
+<Td><Font Size=-1>DEVVAR_DOUBLEARRAY</Font></Td>
+
+
+
+</Table></Center>
+
+</center>
+<Br>&nbsp;<Br>
+
+<Br>
+<Br>
+<Br>
+<A NAME="Init"><!-- --></A>
+<A NAME="Init"><!-- --></A>
+<h2>1 - Init</h2>
+<ul>
+<Li><Strong>Description: </Strong> This commands re-initialise a device keeping the same network connection.<Br>
+After an Init command executed on a device, it is not necessary for client to re-connect to the device.<Br>
+This command first calls the device <i> delete_device() </i>method and then execute its <i> init_device()</i> method.<Br>
+For C++ device server, all the memory allocated in the <i> nit_device() </i> method must be freed in the <i> delete_device() </i> method.<Br>
+The language device desctructor automatically calls the <i> delete_device() </i> method.<Br>&nbsp
+<Li><Strong>Argin:<Br>DEV_VOID</Strong>
+ : none.<Br>&nbsp
+<Li><Strong>Argout:<Br>DEV_VOID</Strong>
+ : none.<Br>&nbsp
+<Li><Strong>Command allowed for: </Strong><Ul>
+<Li>Tango::ON<Li>Tango::OFF<Li>Tango::FAULT<Li>Tango::ALARM</Ul>
+<Br>&nbsp
+</ul><Br>
+<Br>
+<A NAME="State"><!-- --></A>
+<A NAME="State"><!-- --></A>
+<h2>2 - State</h2>
+<ul>
+<Li><Strong>Description: </Strong> This command gets the device state (stored in its <i>device_state</i> data member) and returns it to the caller.<Br>&nbsp
+<Li><Strong>Argin:<Br>DEV_VOID</Strong>
+ : none.<Br>&nbsp
+<Li><Strong>Argout:<Br>DEV_STATE</Strong>
+ : State Code<Br>&nbsp
+<Li><Strong>Command allowed for: </Strong><Ul>
+<Li>Tango::ON<Li>Tango::OFF<Li>Tango::FAULT<Li>Tango::ALARM</Ul>
+<Br>&nbsp
+</ul><Br>
+<Br>
+<A NAME="Status"><!-- --></A>
+<A NAME="Status"><!-- --></A>
+<h2>3 - Status</h2>
+<ul>
+<Li><Strong>Description: </Strong> This command gets the device status (stored in its <i>device_status</i> data member) and returns it to the caller.<Br>&nbsp
+<Li><Strong>Argin:<Br>DEV_VOID</Strong>
+ : none.<Br>&nbsp
+<Li><Strong>Argout:<Br>CONST_DEV_STRING</Strong>
+ : Status description<Br>&nbsp
+<Li><Strong>Command allowed for: </Strong><Ul>
+<Li>Tango::ON<Li>Tango::OFF<Li>Tango::FAULT<Li>Tango::ALARM</Ul>
+<Br>&nbsp
+</ul><Br>
+<Br>
+<A NAME="Start"><!-- --></A>
+<A NAME="Start"><!-- --></A>
+<h2>4 - Start</h2>
+<ul>
+<Li><Strong>Description: </Strong> Connect to a camera and start image acquisition. (Camera Controls)<Br>&nbsp
+<Li><Strong>Argin:<Br>DEV_STRING</Strong>
+ : camera label or ip number<Br>&nbsp
+<Li><Strong>Argout:<Br>DEV_VOID</Strong>
+ : <Br>&nbsp
+<Li><Strong>Command allowed for: </Strong><Ul>
+<Li>Tango::OFF<Li>Tango::FAULT<Li>Tango::ALARM</Ul>
+<Br>&nbsp
+</ul><Br>
+<Br>
+<A NAME="Stop"><!-- --></A>
+<A NAME="Stop"><!-- --></A>
+<h2>5 - Stop</h2>
+<ul>
+<Li><Strong>Description: </Strong> Stop the acquisition on the camera and disconnect from it. (Camera Controls)<Br>&nbsp
+<Li><Strong>Argin:<Br>DEV_VOID</Strong>
+ : <Br>&nbsp
+<Li><Strong>Argout:<Br>DEV_VOID</Strong>
+ : <Br>&nbsp
+<Li><Strong>Command allowed for: </Strong><Ul>
+<Li>Tango::ON<Li>Tango::OFF<Li>Tango::FAULT<Li>Tango::ALARM</Ul>
+<Br>&nbsp
+</ul><Br>
+<Br>
+<A NAME="Reset"><!-- --></A>
+<A NAME="Reset"><!-- --></A>
+<h2>6 - Reset</h2>
+<ul>
+<Li><Strong>Description: </Strong> Restart connection on the current selected camera. (Camera Controls)<Br>&nbsp
+<Li><Strong>Argin:<Br>DEV_VOID</Strong>
+ : <Br>&nbsp
+<Li><Strong>Argout:<Br>DEV_VOID</Strong>
+ : <Br>&nbsp
+<Li><Strong>Command allowed for: </Strong><Ul>
+<Li>Tango::ON<Li>Tango::OFF<Li>Tango::FAULT<Li>Tango::ALARM</Ul>
+<Br>&nbsp
+</ul><Br>
+<Br>
+<A NAME="ListCamera"><!-- --></A>
+<A NAME="ListCamera"><!-- --></A>
+<h2>7 - ListCamera</h2>
+<ul>
+<Li><Strong>Description: </Strong> List cameras that could be connected to this device. (Camera Controls)<Br>&nbsp
+<Li><Strong>Argin:<Br>DEV_VOID</Strong>
+ : <Br>&nbsp
+<Li><Strong>Argout:<Br>DEVVAR_STRINGARRAY</Strong>
+ : camera labels<Br>&nbsp
+<Li><Strong>Command allowed for: </Strong><Ul>
+<Li>Tango::ON<Li>Tango::OFF<Li>Tango::FAULT<Li>Tango::ALARM</Ul>
+<Br>&nbsp
+</ul><Br>
+<Br>
+<A NAME="AcquireBackground"><!-- --></A>
+<A NAME="AcquireBackground"><!-- --></A>
+<h2>8 - AcquireBackground</h2>
+<ul>
+<Li><Strong>Description: </Strong> Acquire background image. (Processing Setup)<Br>&nbsp
+<Li><Strong>Argin:<Br>DEV_VOID</Strong>
+ : <Br>&nbsp
+<Li><Strong>Argout:<Br>DEV_VOID</Strong>
+ : <Br>&nbsp
+<Li><Strong>Command allowed for: </Strong><Ul>
+<Li>Tango::OFF<Li>Tango::FAULT<Li>Tango::ALARM</Ul>
+<Br>&nbsp
+</ul><Br>
+<Br>
+<A NAME="GetImage8"><!-- --></A>
+<A NAME="GetImage8"><!-- --></A>
+<h2>9 - GetImage8</h2>
+<ul>
+<Li><Strong>Description: </Strong> <Br>&nbsp
+<Li><Strong>Argin:<Br>DEVVAR_LONGARRAY</Strong>
+ : mode (0,1,2), more parameters<Br>&nbsp
+<Li><Strong>Argout:<Br>DEVVAR_CHARARRAY</Strong>
+ : <Br>&nbsp
+<Li><Strong>Command allowed for: </Strong><Ul>
+<Li>Tango::OFF<Li>Tango::FAULT<Li>Tango::ALARM</Ul>
+<Br>&nbsp
+</ul><Br>
+<Br>
+<A NAME="GetImage16"><!-- --></A>
+<A NAME="GetImage16"><!-- --></A>
+<h2>10 - GetImage16</h2>
+<ul>
+<Li><Strong>Description: </Strong> <Br>&nbsp
+<Li><Strong>Argin:<Br>DEVVAR_LONGARRAY</Strong>
+ : mode (0,1,2), more parameters<Br>&nbsp
+<Li><Strong>Argout:<Br>DEVVAR_USHORTARRAY</Strong>
+ : <Br>&nbsp
+<Li><Strong>Command allowed for: </Strong><Ul>
+<Li>Tango::OFF<Li>Tango::FAULT<Li>Tango::ALARM</Ul>
+<Br>&nbsp
+</ul><Br>
+<Br>
+<A NAME="GetHorPos"><!-- --></A>
+<A NAME="GetHorPos"><!-- --></A>
+<h2>11 - GetHorPos</h2>
+<ul>
+<Li><Strong>Description: </Strong> <Br>&nbsp
+<Li><Strong>Argin:<Br>DEVVAR_LONGARRAY</Strong>
+ : mode (0,1,2), more parameters<Br>&nbsp
+<Li><Strong>Argout:<Br>DEVVAR_DOUBLEARRAY</Strong>
+ : <Br>&nbsp
+<Li><Strong>Command allowed for: </Strong><Ul>
+<Li>Tango::OFF<Li>Tango::FAULT<Li>Tango::ALARM</Ul>
+<Br>&nbsp
+</ul><Br>
+<Br>
+<A NAME="GetVerPos"><!-- --></A>
+<A NAME="GetVerPos"><!-- --></A>
+<h2>12 - GetVerPos</h2>
+<ul>
+<Li><Strong>Description: </Strong> <Br>&nbsp
+<Li><Strong>Argin:<Br>DEVVAR_LONGARRAY</Strong>
+ : mode (0,1,2), more parameters<Br>&nbsp
+<Li><Strong>Argout:<Br>DEVVAR_DOUBLEARRAY</Strong>
+ : <Br>&nbsp
+<Li><Strong>Command allowed for: </Strong><Ul>
+<Li>Tango::OFF<Li>Tango::FAULT<Li>Tango::ALARM</Ul>
+<Br>&nbsp
+</ul><Br>
+<Br>
+<A NAME="GetHorSigma"><!-- --></A>
+<A NAME="GetHorSigma"><!-- --></A>
+<h2>13 - GetHorSigma</h2>
+<ul>
+<Li><Strong>Description: </Strong> <Br>&nbsp
+<Li><Strong>Argin:<Br>DEVVAR_LONGARRAY</Strong>
+ : mode (0,1,2), more parameters<Br>&nbsp
+<Li><Strong>Argout:<Br>DEVVAR_DOUBLEARRAY</Strong>
+ : <Br>&nbsp
+<Li><Strong>Command allowed for: </Strong><Ul>
+<Li>Tango::OFF<Li>Tango::FAULT<Li>Tango::ALARM</Ul>
+<Br>&nbsp
+</ul><Br>
+<Br>
+<A NAME="GetVerSigma"><!-- --></A>
+<A NAME="GetVerSigma"><!-- --></A>
+<h2>14 - GetVerSigma</h2>
+<ul>
+<Li><Strong>Description: </Strong> <Br>&nbsp
+<Li><Strong>Argin:<Br>DEVVAR_LONGARRAY</Strong>
+ : mode (0,1,2), more parameters<Br>&nbsp
+<Li><Strong>Argout:<Br>DEVVAR_DOUBLEARRAY</Strong>
+ : <Br>&nbsp
+<Li><Strong>Command allowed for: </Strong><Ul>
+<Li>Tango::OFF<Li>Tango::FAULT<Li>Tango::ALARM</Ul>
+<Br>&nbsp
+</ul><Br>
+<Br>
+<A NAME="GetArea"><!-- --></A>
+<A NAME="GetArea"><!-- --></A>
+<h2>15 - GetArea</h2>
+<ul>
+<Li><Strong>Description: </Strong> <Br>&nbsp
+<Li><Strong>Argin:<Br>DEVVAR_LONGARRAY</Strong>
+ : mode (0,1,2), more parameters<Br>&nbsp
+<Li><Strong>Argout:<Br>DEVVAR_DOUBLEARRAY</Strong>
+ : <Br>&nbsp
+<Li><Strong>Command allowed for: </Strong><Ul>
+<Li>Tango::OFF<Li>Tango::FAULT<Li>Tango::ALARM</Ul>
+<Br>&nbsp
+</ul><Br>
+<Br>
+<A NAME="GetAcquisitionCounter"><!-- --></A>
+<A NAME="GetAcquisitionCounter"><!-- --></A>
+<h2>16 - GetAcquisitionCounter</h2>
+<ul>
+<Li><Strong>Description: </Strong> <Br>&nbsp
+<Li><Strong>Argin:<Br>DEVVAR_LONGARRAY</Strong>
+ : mode (0,1,2), more parameters<Br>&nbsp
+<Li><Strong>Argout:<Br>DEVVAR_LONGARRAY</Strong>
+ : <Br>&nbsp
+<Li><Strong>Command allowed for: </Strong><Ul>
+<Li>Tango::OFF<Li>Tango::FAULT<Li>Tango::ALARM</Ul>
+<Br>&nbsp
+</ul><Br>
+<Br>
+<A NAME="GetSaturation"><!-- --></A>
+<A NAME="GetSaturation"><!-- --></A>
+<h2>17 - GetSaturation</h2>
+<ul>
+<Li><Strong>Description: </Strong> Get saturation values from the circular buffers<Br>&nbsp
+<Li><Strong>Argin:<Br>DEVVAR_LONGARRAY</Strong>
+ : <Br>&nbsp
+<Li><Strong>Argout:<Br>DEVVAR_DOUBLEARRAY</Strong>
+ : <Br>&nbsp
+<Li><Strong>Command allowed for: </Strong><Ul>
+<Li>Tango::OFF<Li>Tango::FAULT<Li>Tango::ALARM</Ul>
+<Br>&nbsp
+</ul><Br>
+<Br>
+<A NAME="SetReference"><!-- --></A>
+<A NAME="SetReference"><!-- --></A>
+<h2>18 - SetReference</h2>
+<ul>
+<Li><Strong>Description: </Strong> <Br>&nbsp
+<Li><Strong>Argin:<Br>DEV_VOID</Strong>
+ : <Br>&nbsp
+<Li><Strong>Argout:<Br>DEV_VOID</Strong>
+ : <Br>&nbsp
+<Li><Strong>Command allowed for: </Strong><Ul>
+<Li>Tango::ON<Li>Tango::OFF<Li>Tango::FAULT<Li>Tango::ALARM</Ul>
+<Br>&nbsp
+</ul><Br>
+<Br>
+<A NAME="GetPhase"><!-- --></A>
+<A NAME="GetPhase"><!-- --></A>
+<h2>19 - GetPhase</h2>
+<ul>
+<Li><Strong>Description: </Strong> <Br>&nbsp
+<Li><Strong>Argin:<Br>DEVVAR_LONGARRAY</Strong>
+ : mode (0,1,2), more parameters<Br>&nbsp
+<Li><Strong>Argout:<Br>DEVVAR_DOUBLEARRAY</Strong>
+ : <Br>&nbsp
+<Li><Strong>Command allowed for: </Strong><Ul>
+<Li>Tango::OFF<Li>Tango::FAULT<Li>Tango::ALARM</Ul>
+<Br>&nbsp
+</ul><Br>
+<Br>
+<A NAME="SaveScale"><!-- --></A>
+<A NAME="SaveScale"><!-- --></A>
+<h2>20 - SaveScale</h2>
+<ul>
+<Li><Strong>Description: </Strong> Save pixel size calibration<Br>&nbsp
+<Li><Strong>Argin:<Br>DEV_VOID</Strong>
+ : <Br>&nbsp
+<Li><Strong>Argout:<Br>DEV_VOID</Strong>
+ : <Br>&nbsp
+<Li><Strong>Command allowed for: </Strong><Ul>
+<Li>Tango::OFF<Li>Tango::FAULT<Li>Tango::ALARM</Ul>
+<Br>&nbsp
+</ul><Br>
+<Br>
+<A NAME="RestoreScale"><!-- --></A>
+<A NAME="RestoreScale"><!-- --></A>
+<h2>21 - RestoreScale</h2>
+<ul>
+<Li><Strong>Description: </Strong> Restore pixel calibration<Br>&nbsp
+<Li><Strong>Argin:<Br>DEV_VOID</Strong>
+ : <Br>&nbsp
+<Li><Strong>Argout:<Br>DEV_VOID</Strong>
+ : <Br>&nbsp
+<Li><Strong>Command allowed for: </Strong><Ul>
+<Li>Tango::OFF<Li>Tango::FAULT<Li>Tango::ALARM</Ul>
+<Br>&nbsp
+</ul><Br>
+<Br>
+<A NAME="SetMeasurePoint"><!-- --></A>
+<A NAME="SetMeasurePoint"><!-- --></A>
+<h2>22 - SetMeasurePoint</h2>
+<ul>
+<Li><Strong>Description: </Strong> Set measure point in the image<Br>&nbsp
+<Li><Strong>Argin:<Br>DEVVAR_LONGARRAY</Strong>
+ : horizontal pixel position, vertical pixel position<Br>&nbsp
+<Li><Strong>Argout:<Br>DEV_VOID</Strong>
+ : <Br>&nbsp
+<Li><Strong>Command allowed for: </Strong><Ul>
+<Li>Tango::OFF<Li>Tango::FAULT<Li>Tango::ALARM</Ul>
+<Br>&nbsp
+</ul><Br>
+<Br>
+<A NAME="ClearMeasurePoints"><!-- --></A>
+<A NAME="ClearMeasurePoints"><!-- --></A>
+<h2>23 - ClearMeasurePoints</h2>
+<ul>
+<Li><Strong>Description: </Strong> Clear all reference points in the image<Br>&nbsp
+<Li><Strong>Argin:<Br>DEV_VOID</Strong>
+ : <Br>&nbsp
+<Li><Strong>Argout:<Br>DEV_VOID</Strong>
+ : <Br>&nbsp
+<Li><Strong>Command allowed for: </Strong><Ul>
+<Li>Tango::OFF<Li>Tango::FAULT<Li>Tango::ALARM</Ul>
+<Br>&nbsp
+</ul><Br>
+<Br>
+<A NAME="GetIntensity"><!-- --></A>
+<A NAME="GetIntensity"><!-- --></A>
+<h2>24 - GetIntensity</h2>
+<ul>
+<Li><Strong>Description: </Strong> Get intensity values from the circular buffers<Br>&nbsp
+<Li><Strong>Argin:<Br>DEVVAR_LONGARRAY</Strong>
+ : <Br>&nbsp
+<Li><Strong>Argout:<Br>DEVVAR_DOUBLEARRAY</Strong>
+ : <Br>&nbsp
+<Li><Strong>Command allowed for: </Strong><Ul>
+<Li>Tango::OFF<Li>Tango::FAULT<Li>Tango::ALARM</Ul>
+<Br>&nbsp
+</ul><Br>
+<Br>
+
+</center>
+<Br>&nbsp;<Br><Br>&nbsp;<Br>
+
+<!--- html Footer --->
+
+<Center>
+<Font size=-1>
+<br>
+<br>
+<TABLE BORDER="1" WIDTH="100%">
+    <Tr>
+		<!--- Hosted by Sourceforge --->
+        <Td Align="Center">
+			<b>TANGO</b> is an open source project hosted by :<br>
+			<A href="http://sourceforge.net" Target="new">
+					<IMG title="Sourceforge logo"
+						alt="Sourceforge logo small"
+						src="http://www.esrf.fr/computing/cs/tango/sourceforge.gif"
+						border=0> </a>
+		</Td>
+		<!--- 2 Sourceforge Repositories --->
+		<Td Align="Center">
+			Core and Tools :
+			<a href="http://tango-cs.cvs.sourceforge.net/tango-cs/" Target="new">
+			CVS repository</a> on
+			<a href="https://sourceforge.net/projects/tango-cs" Target=new>
+			tango-cs project</a>
+
+			<br>
+
+			Device Servers :
+			<a href="http://tango-ds.cvs.sourceforge.net/tango-ds/" Target="new">
+					CVS repository</a> on
+			<a href="https://sourceforge.net/projects/tango-ds" Target=new>
+					tango-ds project</a>
+		</Td>
+    </Tr>
+</Table>
+</Font>
+</Center>
+</body>
+</html>
